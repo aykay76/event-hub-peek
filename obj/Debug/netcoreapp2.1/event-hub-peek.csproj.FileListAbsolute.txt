@@ -1,0 +1,11 @@
+/Users/alan/git/event-hub-peek/bin/Debug/netcoreapp2.1/event-hub-peek.deps.json
+/Users/alan/git/event-hub-peek/bin/Debug/netcoreapp2.1/event-hub-peek.runtimeconfig.json
+/Users/alan/git/event-hub-peek/bin/Debug/netcoreapp2.1/event-hub-peek.runtimeconfig.dev.json
+/Users/alan/git/event-hub-peek/bin/Debug/netcoreapp2.1/event-hub-peek.dll
+/Users/alan/git/event-hub-peek/bin/Debug/netcoreapp2.1/event-hub-peek.pdb
+/Users/alan/git/event-hub-peek/obj/Debug/netcoreapp2.1/event-hub-peek.csprojAssemblyReference.cache
+/Users/alan/git/event-hub-peek/obj/Debug/netcoreapp2.1/event-hub-peek.csproj.CoreCompileInputs.cache
+/Users/alan/git/event-hub-peek/obj/Debug/netcoreapp2.1/event-hub-peek.AssemblyInfoInputs.cache
+/Users/alan/git/event-hub-peek/obj/Debug/netcoreapp2.1/event-hub-peek.AssemblyInfo.cs
+/Users/alan/git/event-hub-peek/obj/Debug/netcoreapp2.1/event-hub-peek.dll
+/Users/alan/git/event-hub-peek/obj/Debug/netcoreapp2.1/event-hub-peek.pdb
