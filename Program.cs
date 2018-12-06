@@ -11,8 +11,6 @@ namespace event_hub_peek
     {
         static int Main(string[] args)
         {
-            Console.CursorVisible = false;
-
             // might want to run something async at some point, stick it on the thread pool
             var source = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
@@ -35,17 +33,40 @@ namespace event_hub_peek
 
         private static async Task<int> MainAsync(string[] args, CancellationToken token)
         {
-            EventHubClient client = EventHubClient.CreateFromConnectionString(args[0]);
-            PartitionReceiver r = client.CreateReceiver(args[1], args[2], EventPosition.FromStart(), null);
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Usage: event-hub-peek [connection string] [consumer group] [partition]");
+                return -1;
+            }
+
+            string connectionString = args[0];
+            string consumerGroup = args[1];
+            string partition = args[2];
+
+            Console.WriteLine($"Connecting...");
+
+            EventHubClient client = EventHubClient.CreateFromConnectionString(connectionString);
+
+            Console.WriteLine($"Creating receiver for consumer group {consumerGroup}, partition {partition}");
+
+            PartitionReceiver r = client.CreateReceiver(consumerGroup, partition, EventPosition.FromStart(), null);
             
             while (!token.IsCancellationRequested)
             {
                 IEnumerable<EventData> received = await r.ReceiveAsync(1);
-                IEnumerator<EventData> enumerator = received.GetEnumerator();
-                if (enumerator.MoveNext())
+                if (received == null)
                 {
-                    EventData data = enumerator.Current;
-                    Console.WriteLine(System.Text.Encoding.UTF8.GetString(data.Body.Array));
+                    Console.WriteLine("Timed out, try again later.");
+                    return -2;
+                }
+                else
+                {
+                	IEnumerator<EventData> enumerator = received.GetEnumerator();
+                	if (enumerator.MoveNext())
+                	{
+                        EventData data = enumerator.Current;
+                        Console.WriteLine(System.Text.Encoding.UTF8.GetString(data.Body.Array));
+                	}
                 }
             }
 
