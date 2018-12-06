@@ -33,19 +33,30 @@ namespace event_hub_peek
 
         private static async Task<int> MainAsync(string[] args, CancellationToken token)
         {
-            if (args.Length < 3)
+            if (args.Length < 4)
             {
-                Console.WriteLine("Usage: event-hub-peek [connection string] [consumer group] [partition]");
+                Console.WriteLine("Usage: event-hub-peek namespace-name topic-name consumer-group partition");
+                Console.WriteLine("Ensure the SAS key has the correct permissions and is in the EVENT_HUB_SAS_KEY environment variable");
                 return -1;
             }
 
-            string connectionString = args[0];
-            string consumerGroup = args[1];
-            string partition = args[2];
+            string namespaceName = args[0];
+            string topicName = args[1];
+            string consumerGroup = args[2];
+            string partition = args[3];
+            string sharedAccessKey = Environment.GetEnvironmentVariable("EVENT_HUB_SAS_KEY");
+            string sharedAccessName = Environment.GetEnvironmentVariable("EVENT_HUB_SAS_NAME");
+
+            if (sharedAccessKey == null)
+            {
+                Console.WriteLine("Key needs to be in EVENT_HUB_SAS_KEY environment variable");
+                return -1;
+            }
 
             Console.WriteLine($"Connecting...");
 
-            EventHubClient client = EventHubClient.CreateFromConnectionString(connectionString);
+            TokenProvider tokenProvider = SharedAccessSignatureTokenProvider.CreateSharedAccessSignatureTokenProvider(sharedAccessName, sharedAccessKey);
+            EventHubClient client = EventHubClient.Create(new Uri($"sb://{namespaceName}.servicebus.windows.net/"), topicName, tokenProvider);
 
             Console.WriteLine($"Creating receiver for consumer group {consumerGroup}, partition {partition}");
 
