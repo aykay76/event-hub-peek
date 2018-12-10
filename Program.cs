@@ -36,7 +36,9 @@ namespace event_hub_peek
             if (args.Length < 4)
             {
                 Console.WriteLine("Usage: event-hub-peek namespace-name topic-name consumer-group partition");
-                Console.WriteLine("Ensure the SAS key has the correct permissions and is in the EVENT_HUB_SAS_KEY environment variable");
+                Console.WriteLine("Ensure the SAS key has the correct permissions and that the following environment variables are set:");
+                Console.WriteLine(" - EVENT_HUB_SAS_NAME contains the name of the SAS key you will use to connect to the event hub");
+                Console.WriteLine(" - EVENT_HUB_SAS_KEY  contains the SAS key for the event hub to which you wish to connect");
                 return -1;
             }
 
