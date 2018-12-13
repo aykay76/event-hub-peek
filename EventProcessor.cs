@@ -10,15 +10,32 @@ namespace event_hub_peek
 {
     public class SimpleEventProcessor : IEventProcessor
     {
+        public PartitionContext Context { get; private set; }
+        public event EventHandler ProcessorClosed;
+        public bool IsInitialised { get; private set; }
+        public bool IsClosed { get; private set; }
+
+        public SimpleEventProcessor()
+        {
+            this.IsClosed = false;
+            this.IsInitialised = false;
+        }
+
         public Task CloseAsync(PartitionContext context, CloseReason reason)
         {
             Console.WriteLine($"Processor Shutting Down. Partition '{context.PartitionId}', Reason: '{reason}'.");
+            this.IsClosed = true;
+            this.OnProcessorClosed();
             return Task.CompletedTask;
         }
 
         public Task OpenAsync(PartitionContext context)
         {
+            this.Context = context;
+
             Console.WriteLine($"SimpleEventProcessor initialized. Partition: '{context.PartitionId}'");
+            this.IsInitialised = true;
+
             return Task.CompletedTask;
         }
 
@@ -37,6 +54,15 @@ namespace event_hub_peek
             }
 
             return context.CheckpointAsync();
+        }
+
+        protected virtual void OnProcessorClosed()
+        {
+            EventHandler handler = this.ProcessorClosed;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
         }
     } 
 }
