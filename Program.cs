@@ -34,9 +34,31 @@ namespace event_hub_peek
 
         private static async Task<int> MainAsync(string[] args, CancellationToken token)
         {
+            string eventHubConnectionString = ConfigurationManager.ConnectionStrings["EventHubListen"].ConnectionString;
+            string eventHubName = ConfigurationManager.AppSettings["EventHubName"];
+            string storageConnectionString = ConfigurationManager.ConnectionStrings["StorageAccount"].ConnectionString;
+            string storageContainer = ConfigurationManager.AppSettings["StorageContainer"];
+            string consumerGroup = ConfigurationManager.AppSettings["ConsumerGroup"];
+            string eventProcessorHostName = Environment.MachineName;
+            EventProcessorHost eventProcessorHost = new EventProcessorHost(eventProcessorHostName, eventHubName, consumerGroup, eventHubConnectionString, storageConnectionString, "spehubcontainer");
+            Console.WriteLine("Registering EventProcessor...");
+            var options = new EventProcessorOptions();
+            var factory = new SimpleEventProcessorFactory(eventProcessorHostName);
+            await eventProcessorHost.RegisterEventProcessorFactoryAsync(factory, options);
+        
+            Console.WriteLine("Receiving. Press Enter to stop worker.");
+            // WaitHandle.WaitAll(new WaitHandle[] { token.WaitHandle });
+            Console.ReadLine();
+            
+            Console.WriteLine("☕️ Aborting, waiting for processors to shut down, giving 90 seconds ...");
+            eventProcessorHost.UnregisterEventProcessorAsync().Wait();
+
+            return 0;
+
+            // 👀 leaving this here as an exmaple of a basic receiver - EventProcessorHost is the way to go for multiple partitions etc.
             // if (args.Length < 4)
             // {
-            //     Console.WriteLine("Usage: event-hub-peek namespace-name topic-name consumer-group partition");
+            //     Console.WriteLine("Usage: event-hub-receiver namespace-name topic-name consumer-group partition");
             //     Console.WriteLine("Ensure the SAS key has the correct permissions and that the following environment variables are set:");
             //     Console.WriteLine(" - EVENT_HUB_SAS_NAME contains the name of the SAS key you will use to connect to the event hub");
             //     Console.WriteLine(" - EVENT_HUB_SAS_KEY  contains the SAS key for the event hub to which you wish to connect");
@@ -49,30 +71,6 @@ namespace event_hub_peek
             // string partition = args[3];
             // string sharedAccessKey = Environment.GetEnvironmentVariable("EVENT_HUB_SAS_KEY");
             // string sharedAccessName = Environment.GetEnvironmentVariable("EVENT_HUB_SAS_NAME");
-
-    string eventHubConnectionString = ConfigurationManager.ConnectionStrings["EventHubListen"].ConnectionString;
-    string eventHubName = ConfigurationManager.AppSettings["EventHubName"];
-    string storageConnectionString = ConfigurationManager.ConnectionStrings["StorageAccount"].ConnectionString;
-    string storageContainer = ConfigurationManager.AppSettings["StorageContainer"];
-    string consumerGroup = ConfigurationManager.AppSettings["ConsumerGroup"];
-    string eventProcessorHostName = Environment.MachineName;
-    EventProcessorHost eventProcessorHost = new EventProcessorHost(eventProcessorHostName, eventHubName, consumerGroup, eventHubConnectionString, storageConnectionString, "spehubcontainer");
-    Console.WriteLine("Registering EventProcessor...");
-    var options = new EventProcessorOptions();
-    var factory = new SimpleEventProcessorFactory(eventProcessorHostName);
-    await eventProcessorHost.RegisterEventProcessorFactoryAsync(factory, options);
-  
-//   options.ExceptionReceived += (sender, e) => { Console.WriteLine(e.Exception); };
-//   await eventProcessorHost.RegisterEventProcessorAsync<SimpleEventProcessor>(options);
-
-    Console.WriteLine("Receiving. Press Enter to stop worker.");
-    // WaitHandle.WaitAll(new WaitHandle[] { token.WaitHandle });
-    Console.ReadLine();
-    
-    Console.WriteLine("☕️ Aborting, waiting for processors to shut down, giving 90 seconds ...");
-    eventProcessorHost.UnregisterEventProcessorAsync().Wait();
-
-    return 0;
 
             // if (sharedAccessKey == null)
             // {
